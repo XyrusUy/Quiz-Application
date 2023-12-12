@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-image: url("bg.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        #quiz-container {
+            max-width: 600px;
+            margin: auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-image: url("bg1.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .question {
+            margin-bottom: 20px;
+            color: gold;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            font-size: 2em;
+        }
+
+        .options button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+            border: solid;
+            border-radius: 20px;
+            text-align: center;
+            color: blue;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .options button:hover {
+            background-color: green;
+            transition: 0.5s;
+        }
+
+        #timer {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: gold;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
+        #feedback {
+            font-weight: bold;
+            margin-top: 10px;
+            color: gold;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+
+        }
+
+        #next-btn, #restart-btn {
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            font-size: 1em;
+        }
+
+        #next-btn:hover, #restart-btn:hover {
+            background-color: yellow;
+            color: red;
+            transition: 0.6s;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <div id="timer"></div>
+        <div id="question-container" class="question"></div>
+        <div id="options-container" class="options"></div>
+        <div id="feedback"></div>
+        <button id="next-btn">Next</button>
+        <button id="restart-btn" style="display: none;">Restart</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Which of the following is NOT a type of algorithm?",
+                options: ["Program", "Flowchart", "Decision Table", "Pseudocode"],
+                correctAnswer: "Program"
+            },
+            {
+                question: "The symbol that represents comments in a flowchart is?",
+                options: ["A procedure symbol", "A annotation symbol", "A flow line", " A subroutine"],
+                correctAnswer: "A annotation symbol"
+            },
+            {
+                question: "If the English language follows formats and rules on grammar, what does QBasic follow as a counterpart?",
+                options: ["Strings", "Syntax", "Grammar", "All of the above"],
+                correctAnswer: "Syntax"
+            },
+            {
+                question: "The following are types of errors in programming, except:",
+                options: ["Logic error", "Grammar error", "Compile error", "Syntax error"],
+                correctAnswer: "Grammar error"
+            },
+            {
+                question: "cout is a/an __________?",
+                options: ["Operator", "Object", "Macro", "Function"],
+                correctAnswer: "Object"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer;
+
+        const questionContainer = document.getElementById("question-container");
+        const optionsContainer = document.getElementById("options-container");
+        const timerContainer = document.getElementById("timer");
+        const feedbackContainer = document.getElementById("feedback");
+        const nextButton = document.getElementById("next-btn");
+        const restartButton = document.getElementById("restart-btn");
+
+        function startQuiz() {
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionContainer.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = "";
+            feedbackContainer.innerHTML = "";
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement("button");
+                button.textContent = option;
+                button.addEventListener("click", () => checkAnswer(index));
+                optionsContainer.appendChild(button);
+            });
+
+            // Display and start the 15-second timer
+            let timeLeft = 15;
+            updateTimerDisplay(timeLeft);
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay(timeLeft);
+
+                if (timeLeft === 0) {
+                    clearInterval(timer);
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < questions.length) {
+                        showQuestion();
+                    } else {
+                        showScore();
+                    }
+                }
+            }, 1000);
+
+            nextButton.style.display = "none";
+            restartButton.style.display = "none";
+        }
+
+        function checkAnswer(selectedIndex) {
+            clearInterval(timer);
+
+            const currentQuestion = questions[currentQuestionIndex];
+            const selectedOption = currentQuestion.options[selectedIndex];
+
+            if (selectedOption === currentQuestion.correctAnswer) {
+                score++;
+                feedbackContainer.textContent = "Correct!";
+            } else {
+                feedbackContainer.textContent = `Incorrect! The correct answer is: ${currentQuestion.correctAnswer}`;
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                nextButton.style.display = "block";
+            } else {
+                showScore();
+            }
+        }
+
+        function showScore() {
+            clearInterval(timer);
+
+            questionContainer.textContent = `Your Score: ${score} out of ${questions.length}`;
+            optionsContainer.innerHTML = "";
+            feedbackContainer.innerHTML = "";
+            nextButton.style.display = "none";
+            restartButton.style.display = "block";
+            timerContainer.innerHTML = "";
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            startQuiz();
+        }
+
+        function updateTimerDisplay(timeLeft) {
+            timerContainer.innerHTML = `Time Left: ${timeLeft}s`;
+        }
+
+        nextButton.addEventListener("click", showQuestion);
+        restartButton.addEventListener("click", restartQuiz);
+
+        startQuiz();
+    </script>
+</body>
+</html>
+
+
+
+
